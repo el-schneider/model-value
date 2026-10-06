@@ -49,6 +49,6 @@
     "access": "public"
   },
   "dependencies": {
-    "model-frontier": "0.1.0"
+    "model-frontier": "0.2.0"
   }
 }

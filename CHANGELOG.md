@@ -4,6 +4,8 @@ model-value continues [copilot-value](https://github.com/el-schneider/copilot-va
 
 ## Unreleased
 
+- Uses model-frontier 0.2.0. Rankings and the shared score cache are unchanged.
+
 ## 0.1.1
 
 - Copilot: a model in `--models` that your account does not enable is now listed under excluded models with the reason `Not enabled on this account`, instead of being silently left out.
