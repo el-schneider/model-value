@@ -30,6 +30,11 @@ export async function query(raw = {}, { plan = 'github-copilot', all = false, mo
     result.eligibility = { fetchedAt: eligible.fetchedAt, stale: eligible.stale, source: `${eligible.endpoint}/models`, selection: eligible.selection, enabledCount: eligible.modelIds.length, tokenSource: eligible.tokenSource, skippedTokens: eligible.skippedTokens };
     result.caveats[0] = 'Availability comes from the current GitHub token; cached eligibility can change. No remaining-quota check.';
     if (eligible.skippedTokens.length) result.caveats.unshift(skippedTokenNotice(eligible));
+    const notEnabled = [...new Set(wanted)].filter(id => !eligible.modelIds.includes(id));
+    if (notEnabled.length) {
+      result.skipped.push(...notEnabled.map(id => ({ id, reason: 'Not enabled on this account' })));
+      result.skipped.sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
+    }
   }
   return result;
 }

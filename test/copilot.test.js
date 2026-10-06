@@ -51,7 +51,9 @@ test('default query intersects account eligibility; --all bypasses authenticatio
   assert.equal(result.scope, 'copilot-subscription');
   assert.deepEqual(result.models.map(m => m.id), ['allowed']);
   assert.equal(calls, 1);
-  assert.equal((await query({}, { token, cache, modelIds: ['disabled'] })).total, 0);
+  const narrowed = await query({}, { token, cache, modelIds: ['disabled', 'github-copilot/disabled', 'github-copilot/allowed'] });
+  assert.deepEqual(narrowed.models.map(m => m.id), ['allowed']);
+  assert.deepEqual(narrowed.skipped, [{ id: 'disabled', reason: 'Not enabled on this account' }]);
   assert.equal((await query({}, { token, cache, offline: true })).models[0].id, 'allowed');
   assert.equal(calls, 1);
   assert(!(await readFile(`${cache}.eligibility.json`, 'utf8')).includes('fake-'));
