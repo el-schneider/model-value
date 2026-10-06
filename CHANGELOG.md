@@ -4,6 +4,8 @@ model-value continues [copilot-value](https://github.com/el-schneider/copilot-va
 
 ## Unreleased
 
+## 0.1.2
+
 - Uses model-frontier 0.2.0. Rankings and the shared score cache are unchanged.
 
 ## 0.1.1

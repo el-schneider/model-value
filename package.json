@@ -1,6 +1,6 @@
 {
   "name": "model-value",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Get the most out of a multi-vendor AI subscription (GitHub Copilot, OpenCode Go): find the best-value and strongest models for coding",
   "type": "module",
   "engines": {
