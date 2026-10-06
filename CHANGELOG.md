@@ -4,6 +4,8 @@ model-value continues [copilot-value](https://github.com/el-schneider/copilot-va
 
 ## Unreleased
 
+## 0.1.1
+
 - Copilot: a model in `--models` that your account does not enable is now listed under excluded models with the reason `Not enabled on this account`, instead of being silently left out.
 - The agent skill is half as long and easier for small models to follow. Data sources moved to the README.
 
