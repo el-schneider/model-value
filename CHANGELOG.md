@@ -4,6 +4,9 @@ model-value continues [copilot-value](https://github.com/el-schneider/copilot-va
 
 ## Unreleased
 
+- Copilot: a model in `--models` that your account does not enable is now listed under excluded models with the reason `Not enabled on this account`, instead of being silently left out.
+- The agent skill is half as long and easier for small models to follow. Data sources moved to the README.
+
 ## 0.1.0
 
 - First release: ranks the models of GitHub Copilot, OpenCode Go and OpenCode Go Plus by benchmark score and by what a task costs on that plan. Try `npx model-value opencode-go`.

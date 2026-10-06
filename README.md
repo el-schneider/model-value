@@ -77,13 +77,23 @@ Set `ARTIFICIAL_ANALYSIS_API_KEY` ([free](https://artificialanalysis.ai/data-api
 
 ## Agents
 
-Full JSON contract, caveats, and data sources: [skills/model-value/SKILL.md](skills/model-value/SKILL.md).
+JSON contract and rules for agents: [skills/model-value/SKILL.md](skills/model-value/SKILL.md).
 
 ```sh
 npx skills add el-schneider/model-value
 ```
 
 Users of [pi](https://github.com/badlogic/pi-mono) get a `model_value` tool and `/model-value` command with `pi install model-value`. Both use the plans you are logged in to in pi. Copilot eligibility comes from pi's own Copilot login, including GitHub Enterprise logins, not from gh or token variables.
+
+## Data sources
+
+- Copilot eligibility: Copilot's `/models` endpoint (internal), cached 15 minutes per token. Disabled, unconfigured, non-picker and non-tool-calling models are excluded.
+- Copilot prices: the `github-copilot` provider on https://models.dev/api.json (community-maintained). Billing reference: https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing. Long-context rates apply above the published threshold.
+- OpenCode Go prices and limits: the "Usage limits" tables for Go and Go Plus in [go.mdx](https://raw.githubusercontent.com/anomalyco/opencode/dev/packages/web/src/content/docs/go.mdx); display names map to IDs through its "Endpoints" table. Context-tier rows become long-context rates; peak rows are dropped in favour of off-peak. models.dev `opencode-go` adds token limits and family metadata where known.
+- Scores: [model-frontier](https://github.com/el-schneider/model-frontier), cached 24 hours in `$XDG_CACHE_HOME/model-frontier/` and shared with its CLI. Artificial Analysis data is subject to https://artificialanalysis.ai/data-api; do not redistribute snapshots. Arena: `webdev` config, `latest` split, `overall` category.
+- Matching: IDs normalized (`.` and `_` to `-`). AA: exact slug, plus explicit aliases for a few Claude reasoning variants. Arena: exact name, or name plus an effort, date or harness suffix (`-high`, `-max`, `-20251001`, ` (codex-harness)`); the best-scoring variant wins. No fuzzy matching; `--mapping FILE` fixes a missing match.
+- Cost per task: `(uncached × input + cached × cacheRead + writes × cacheWrite + output × output) / 1e6` USD.
+- Snapshot: `$XDG_CACHE_HOME/model-value/snapshot-<plan>-<source>.json` (or `MODEL_VALUE_CACHE`, one exact file), with the Copilot eligibility cache beside it (`.eligibility.json`; `.eligibility-pi-login.json` for pi). Both mode 0600; tokens and keys are never written.
 
 ## License
 
