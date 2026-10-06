@@ -4,6 +4,8 @@ model-value continues [copilot-value](https://github.com/el-schneider/copilot-va
 
 ## Unreleased
 
+## 0.1.0
+
 - Renamed to `model-value`. The plan is the first argument: `model-value github-copilot` (alias `copilot`), `model-value opencode-go`, `model-value opencode-go-plus`. Without a plan, the one detected plan runs; none or several print the commands to choose from.
 - OpenCode Go and Go Plus: ranked by tasks per month (the model's monthly limit ÷ cost per task), with prices and limits parsed from the OpenCode Go docs source. Docs shape changes fail loudly.
 - OpenCode Go detection reuses `OPENCODE_API_KEY` or the key in opencode's or pi's `auth.json`.
