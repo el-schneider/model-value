@@ -1,0 +1,5 @@
+- User-visible changes get one line under `## Unreleased` in `CHANGELOG.md`, in the style of the existing entries.
+- Never bump `package.json`, add a version heading, tag, or create a release. `.github/workflows/release.yml` does that at release time.
+- A new or changed CLI option or pi tool parameter is documented in three places: `--help` in `bin/cli.js`, `README.md`, and `skills/model-value/SKILL.md` (pi tool parameters under "pi extension").
+- Changes in `extensions/` also need `npm run test:pi`. It runs a real `pi` from `PATH` (or `PI_BIN`); CI does not run it.
+- PRs are squash-merged with the PR title as the commit subject: one-line Conventional Commit, no trailing period.

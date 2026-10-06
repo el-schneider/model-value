@@ -1,0 +1,49 @@
+# Prepares a release: Actions -> Release -> Run workflow, or `gh workflow run release.yml -f version=X.Y.Z`.
+# Turns `## Unreleased` in CHANGELOG.md into `## X.Y.Z`, bumps package.json, runs the tests, pushes the
+# release commit to main and opens a draft GitHub release with that changelog section as notes.
+# Publishing the draft starts publish.yml, which publishes to npm. To fix the notes, edit CHANGELOG.md
+# before running this; to abandon a release, delete the draft and revert the release commit.
+name: Release
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version without "v", e.g. 0.6.0
+        required: true
+permissions:
+  contents: write
+concurrency: release
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ inputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Version must be new
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if git ls-remote --exit-code --tags origin "v$VERSION" || gh release view "v$VERSION" > /dev/null 2>&1; then
+            echo "v$VERSION already has a tag or release"; exit 1
+          fi
+      - name: Move Unreleased changelog entries under the version
+        run: node scripts/release-changelog.js "$VERSION" > "$RUNNER_TEMP/notes.md"
+      - run: npm version "$VERSION" --no-git-tag-version
+      - run: npm ci
+      - run: npm test
+      - name: Push release commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -am "chore: release $VERSION"
+          git push origin HEAD:main
+      - name: Create draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "v$VERSION" --draft --target "$(git rev-parse HEAD)" --title "v$VERSION" --notes-file "$RUNNER_TEMP/notes.md"

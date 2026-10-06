@@ -1,0 +1,54 @@
+{
+  "name": "model-value",
+  "version": "0.0.0",
+  "description": "Get the most out of a multi-vendor AI subscription (GitHub Copilot, OpenCode Go): find the best-value and strongest models for coding",
+  "type": "module",
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "bin": {
+    "model-value": "bin/cli.js"
+  },
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "extensions",
+    "README.md",
+    "LICENSE",
+    "skills",
+    "CHANGELOG.md"
+  ],
+  "keywords": [
+    "github-copilot",
+    "opencode-go",
+    "artificial-analysis",
+    "lmarena",
+    "pi-package"
+  ],
+  "pi": {
+    "extensions": [
+      "./extensions/model-value.js"
+    ]
+  },
+  "scripts": {
+    "test": "node --test",
+    "test:pi": "node scripts/pi-smoke.js"
+  },
+  "license": "MIT",
+  "author": "Jonas Schneider",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/el-schneider/model-value.git"
+  },
+  "homepage": "https://github.com/el-schneider/model-value#readme",
+  "bugs": "https://github.com/el-schneider/model-value/issues",
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "model-frontier": "0.1.0"
+  }
+}
