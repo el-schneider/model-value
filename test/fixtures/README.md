@@ -1,4 +1,4 @@
-`go.mdx` is a copy of https://github.com/anomalyco/opencode/blob/dev/packages/web/src/content/docs/go.mdx, and `go-usage-prose.txt` is derived from it. Both are under the opencode MIT License:
+`go.mdx` is a copy of https://github.com/anomalyco/opencode/blob/dev/services/www/src/docs/content/console/go.mdx, and `go-usage-prose.txt` is derived from it. Both are under the opencode MIT License:
 
 Copyright (c) 2025 opencode
 

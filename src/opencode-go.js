@@ -1,8 +1,8 @@
 // OpenCode Go bills each model against its own monthly dollar limit. The only published source for those
 // limits is the docs page; its Markdown source lives in the OpenCode repo, so we parse that strictly.
-export const docsSource = 'https://raw.githubusercontent.com/anomalyco/opencode/dev/packages/web/src/content/docs/go.mdx';
+export const docsSource = 'https://raw.githubusercontent.com/anomalyco/opencode/dev/services/www/src/docs/content/console/go.mdx';
 export const docsPage = 'https://opencode.ai/docs/go/';
-export const tiers = { 'opencode-go': 'Go', 'opencode-go-plus': 'Go Plus' };
+export const tiers = { 'opencode-go': ['Go', 'go'], 'opencode-go-plus': ['Go Plus', 'go-plus'] };
 const priceHeader = ['Model', 'Input', 'Output', 'Cached Read', 'Cached Write', 'Monthly limit'];
 const endpointHeader = ['Model', 'Model ID', 'Endpoint', 'AI SDK Package'];
 
@@ -26,11 +26,14 @@ function section(text, heading) {
   const end = text.indexOf('\n## ', start + heading.length + 2);
   return text.slice(start, end < 0 ? undefined : end);
 }
-function tab(text, label) {
-  const parts = text.split(/<TabItem label="([^"]+)">/);
-  const i = parts.indexOf(label);
+// The pricing tabs are <div slot="go"> / <div slot="go-plus"> inside the go-pricing PlanTabs; later
+// sections (Estimated requests) reuse the same slots, so scope to that PlanTabs block first.
+function tab(text, slot, label) {
+  const pricing = text.split('<PlanTabs id="go-pricing"')[1] ?? fail('no go-pricing PlanTabs under Usage limits');
+  const parts = pricing.split(/<div slot="([^"]+)">/);
+  const i = parts.indexOf(slot);
   if (i < 0) fail(`no "${label}" tab under Usage limits`);
-  return parts[i + 1].split('</TabItem>')[0];
+  return parts[i + 1].split('</div>')[0];
 }
 
 function dollars(cell, label) {
@@ -41,7 +44,9 @@ function dollars(cell, label) {
   return Number(m[1]);
 }
 function limit(cell, name) {
-  const m = /^\*\*(?:\$(\d+(?:\.\d+)?)|(Unlimited))\*\*/.exec(cell);
+  // Cells may prefix a struck-through old limit and suffix a promo note: ~~$30~~ **$60**<br /><small>…</small>.
+  // The current limit is the bold one, so do not anchor at the cell start.
+  const m = /\*\*(?:\$(\d+(?:\.\d+)?)|(Unlimited))\*\*/.exec(cell);
   if (!m) fail(`unreadable monthly limit "${cell}" for ${name}`);
   return m[2] ? null : Number(m[1]);
 }
@@ -63,8 +68,8 @@ export function parseGoDocs(text) {
   if (!ids.size) fail('empty endpoint table');
   const usage = section(text, '## Usage limits');
   const plans = {};
-  for (const [plan, label] of Object.entries(tiers)) {
-    const table = tables(tab(usage, label)).find(t => same(t.header, priceHeader)) ?? fail(`no price table in "${label}" tab`);
+  for (const [plan, [label, slot]] of Object.entries(tiers)) {
+    const table = tables(tab(usage, slot, label)).find(t => same(t.header, priceHeader)) ?? fail(`no price table in "${label}" tab`);
     const models = new Map();
     for (const [cell, input, output, cacheRead, cacheWrite, monthly] of table.rows) {
       const v = variant(cell);

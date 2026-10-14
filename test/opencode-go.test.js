@@ -26,7 +26,7 @@ test('parses both Go tiers from the docs source: limits, tiers, off-peak, unlimi
 test('docs shape drift fails loudly with the source URL', () => {
   const broken = [
     docs.replace('| Monthly limit', '| Monthly cap'),
-    docs.replace('<TabItem label="Go Plus">', '<TabItem label="Plus">'),
+    docs.replace('<div slot="go-plus">', '<div slot="plus">'),
     docs.replace('| GLM-5.3                      | glm-5.3', '| GLM 5.3                      | glm-5.3'),
     docs.replace(/\*\*\$15\*\*/, '15 dollars'),
     docs.replace('(Off-Peak)', '(Night)'),
