@@ -1,18 +1,21 @@
 ## Usage limits
 Usage limits are defined as monthly dollar amounts. The table below shows the
 monthly limit for each plan and the token costs for each model. Token pricing is
-the same for Go and Go Plus.
+the same for Go, Go Plus, and Go Teams.
 Each model has the following usage limits: 5-hour — 20% of the monthly limit;
 weekly — 50%; and monthly — 100%.
-Each model's monthly limit below determines how its usage counts toward those allowances.
+Each model's monthly limit below determines how its usage counts toward those allowances. Each response reports how
+much the request counted, as [`opencode.allowance`](/console/api/inference#cost).
 Token prices are per 1M tokens.
 <PlanTabs id="go-pricing" label="Go plan" syncKey="go-plan">
 <div slot="go">
 </div>
 <div slot="go-plus">
 </div>
+<div slot="go-teams">
+</div>
 </PlanTabs>
-**LongCat 2.5 Preview Free:** Free for a limited time.
-**Step 5 Preview Free:** Free for a limited time.
-**Cat Jam Free:** Free for a limited time.
+**Beam Free:** Free for a limited time. Not available in Angola, Belarus, Cambodia, China (including Hong Kong and Macau), Cuba, the Democratic Republic of the Congo, Equatorial Guinea, Iran, Iraq, Laos, Libya, Nigeria, North Korea, Russia, Syria, Turkmenistan, Uzbekistan, Venezuela, or the Crimea, Donetsk, and Luhansk regions of Ukraine.
+**Iceman Contributor Free:** Free for a limited time.
+**Gemini 4 Argon:** The 50% discount applies through November 30, 2026.
 **DeepSeek V4.1 Flash / V4 Pro:** Peak hours are 01:00-04:00 and 06:00-10:00 UTC, Monday through Friday; all other hours, including weekends, are Off-Peak. [Learn more](https://api-docs.deepseek.com/quick_start/pricing/).
