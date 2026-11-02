@@ -39,7 +39,8 @@ function tab(text, slot, label) {
 function dollars(cell, label) {
   if (cell === 'Free') return 0;
   if (cell === '-') return undefined;
-  const m = /^\$(\d+(?:\.\d+)?)$/.exec(cell);
+  // Discounted cells strike through the list price: ~~$4.00~~ $2.00. The current price is the plain one.
+  const m = /^(?:~~\$\d+(?:\.\d+)?~~ )?\$(\d+(?:\.\d+)?)$/.exec(cell);
   if (!m) fail(`unreadable ${label} "${cell}"`);
   return Number(m[1]);
 }
@@ -50,12 +51,14 @@ function limit(cell, name) {
   if (!m) fail(`unreadable monthly limit "${cell}" for ${name}`);
   return m[2] ? null : Number(m[1]);
 }
-// "Qwen3.7 Plus (> 256K tokens)" → base name plus a context tier; "(Peak)"/"(Off-Peak)" mark time-of-day pricing.
+// "Qwen3.7 Plus (> 256K tokens)" → base name plus a context tier; "(Peak)"/"(Off-Peak)" mark time-of-day pricing;
+// "(50% off)" marks a discount already applied to the price cells.
 function variant(model) {
   const m = /^(.*?) \((.*)\)$/.exec(model);
   if (!m) return { name: model };
   const [, name, note] = m;
   if (note === 'Off-Peak' || note === 'Peak') return { name, period: note };
+  if (/^\d+% off$/.test(note)) return { name };
   const t = /^(≤|>) (\d+)K tokens$/.exec(note);
   if (!t) fail(`unknown price variant "${note}"`);
   return { name, above: t[1] === '>' ? Number(t[2]) * 1000 : undefined, upTo: t[1] === '≤' ? Number(t[2]) * 1000 : undefined };

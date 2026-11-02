@@ -11,14 +11,15 @@ delete process.env.ARTIFICIAL_ANALYSIS_API_KEY;
 const docs = await readFile(new URL('./fixtures/go.mdx', import.meta.url), 'utf8');
 const now = Date.now();
 
-test('parses both Go tiers from the docs source: limits, tiers, off-peak, unlimited', () => {
+test('parses both Go tiers from the docs source: limits, tiers, off-peak, discounts, unlimited', () => {
   const plans = parseGoDocs(docs);
   const get = (plan, id) => plans[plan].find(m => m.id === id);
   assert.equal(plans['opencode-go'].length, plans['opencode-go-plus'].length);
   assert.deepEqual([get('opencode-go', 'glm-5.3').limitUsd, get('opencode-go-plus', 'glm-5.3').limitUsd], [15, 120]);
   assert.deepEqual(get('opencode-go', 'qwen3.7-plus').cost, { input: 0.4, output: 1.6, cache_read: 0.04, cache_write: 0.5, tiers: [{ input: 1.2, output: 4.8, cache_read: 0.12, cache_write: 1.5, tier: { type: 'context', size: 256000 } }] });
   assert.deepEqual([get('opencode-go', 'deepseek-v4-pro').offPeak, get('opencode-go', 'deepseek-v4-pro').cost.input], [true, 0.66]);
-  assert.equal(get('opencode-go', 'longcat-2.5-preview-free').limitUsd, null);
+  assert.deepEqual([get('opencode-go', 'gemini-4-argon').name, get('opencode-go', 'gemini-4-argon').cost], ['Gemini 4 Argon', { input: 2, output: 10, cache_read: 0.1 }]);
+  assert.equal(get('opencode-go', 'beam-free').limitUsd, null);
   // Every parsed model must pass snapshot validation unchanged.
   for (const plan of Object.keys(plans)) validateSnapshot({ version: 3, plan, pricingAt: now, models: plans[plan], benchmarks: { source: 'arena', fetchedAt: now, entries: [{ slug: 'x', name: 'x', score: 1 }] } });
 });
@@ -27,9 +28,10 @@ test('docs shape drift fails loudly with the source URL', () => {
   const broken = [
     docs.replace('| Monthly limit', '| Monthly cap'),
     docs.replace('<div slot="go-plus">', '<div slot="plus">'),
-    docs.replace('| GLM-5.3                      | glm-5.3', '| GLM 5.3                      | glm-5.3'),
+    docs.replace('| GLM-5.3                    | glm-5.3', '| GLM 5.3                    | glm-5.3'),
     docs.replace(/\*\*\$15\*\*/, '15 dollars'),
     docs.replace('(Off-Peak)', '(Night)'),
+    docs.replace('(50% off)', '(half price)'),
   ];
   for (const text of broken) assert.throws(() => parseGoDocs(text), /OpenCode Go docs changed shape .*raw\.githubusercontent\.com/);
 });
@@ -43,7 +45,7 @@ test('Go ranks on share of the model\'s monthly limit, not on dollars', () => {
   assert.equal(Math.floor(glm53.tasksPerMonth), 81);
   assert.equal(glm52.tasksPerMonth / glm53.tasksPerMonth, 4);
   assert.equal(glm53.dispatchId, 'opencode-go/glm-5.3');
-  const free = result.models.find(m => m.id === 'longcat-2.5-preview-free');
+  const free = result.models.find(m => m.id === 'beam-free');
   assert.deepEqual([free.unlimited, free.tasksPerMonth, free.rankingCost], [true, null, 0]);
   assert.match(format(result), /TASKS\/MO/);
   assert.match(format(result), /Off-peak prices: .*deepseek-v4-pro/);
