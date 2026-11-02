@@ -4,6 +4,8 @@ model-value continues [copilot-value](https://github.com/el-schneider/copilot-va
 
 ## Unreleased
 
+## 0.1.4
+
 - OpenCode Go and Go Plus work again: discounted models such as Gemini 4 Argon (50% off) are ranked at their discounted price.
 
 ## 0.1.3
