@@ -1,6 +1,6 @@
 // OpenCode Go bills each model against its own monthly dollar limit. The only published source for those
 // limits is the docs page; its Markdown source lives in the OpenCode repo, so we parse that strictly.
-export const docsSource = 'https://raw.githubusercontent.com/anomalyco/opencode/dev/services/www/src/docs/content/console/go.mdx';
+export const docsSource = 'https://raw.githubusercontent.com/anomalyco/opencode/dev/services/site/src/docs/content/console/go.mdx';
 export const docsPage = 'https://opencode.ai/docs/go/';
 export const tiers = { 'opencode-go': ['Go', 'go'], 'opencode-go-plus': ['Go Plus', 'go-plus'] };
 const priceHeader = ['Model', 'Input', 'Output', 'Cached Read', 'Cached Write', 'Monthly limit'];
