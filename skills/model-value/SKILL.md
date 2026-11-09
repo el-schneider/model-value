@@ -48,6 +48,7 @@ Default workload is 100k input / 10k output, no cache. Pass the real shape when 
 - Value mode: rows without `alternativeTo` form the frontier; each costs more (Go: uses more of the allowance) and scores higher than the one before. A row with `alternativeTo: <id>` scores close to that frontier row and costs at least as much, but less than the next frontier row; `closeOn` names the source(s) that rate it close.
 - `skipped[]`: models excluded and why. Do not guess scores or prices for them. A `--models` entry the Copilot account does not enable shows as `Not enabled on this account`. Fix a missing benchmark match with `--mapping FILE` (JSON `{modelId: benchmarkSlug}`).
 - `stale: true`: run `model-value <plan> refresh` first.
+- `hedgeError` not null: the second score source failed, so alternatives come from `source.id` only. The ranking is valid; tell the user `hedgeError.name` was unavailable.
 
 ## Rules
 

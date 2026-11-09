@@ -5,6 +5,7 @@ model-value continues [copilot-value](https://github.com/el-schneider/copilot-va
 ## Unreleased
 
 - OpenCode Go and Go Plus work again: the ranking follows the Go docs to their new location.
+- An outage of the second score source no longer stops the ranking: it runs on the first source, says which source was unavailable, and `--json` reports it in `hedgeError`.
 
 ## 0.1.4
 

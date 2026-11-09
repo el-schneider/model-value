@@ -200,7 +200,7 @@ function alternativesFor(rows, frontier, catalog, sources, allVersions) {
   return shown.map(({ gap, ...m }) => m);
 }
 
-export function rank(snapshot, raw = {}, { modelIds, mappings = {}, secondary } = {}) {
+export function rank(snapshot, raw = {}, { modelIds, mappings = {}, secondary, secondaryError } = {}) {
   validateSnapshot(snapshot);
   const plan = plans[snapshot.plan];
   const o = options(raw);
@@ -256,6 +256,7 @@ export function rank(snapshot, raw = {}, { modelIds, mappings = {}, secondary } 
     models = front.slice(0, o.top).flatMap(f => [f, ...alternatives.filter(a => a.alternativeTo === f.id)]);
   }
   skipped.sort((a, b) => compare(a.id, b.id));
+  const hedgeError = secondaryError ? { source: secondaryError.source, name: benchmarkSources[secondaryError.source].name, error: secondaryError.error } : null;
   return {
     snapshotId: createHash('sha256').update(JSON.stringify(snapshot)).digest('hex'),
     plan: { id: plan.id, label: plan.label, provider: plan.provider },
@@ -270,14 +271,17 @@ export function rank(snapshot, raw = {}, { modelIds, mappings = {}, secondary } 
         'tasksPerMonth = monthly limit / cost per task, if you used only that model. All models draw on one allowance; each model\'s spend counts against it in proportion to its limit. Not remaining quota.',
       ] : ['Token-billed AI Credits only; not legacy premium-request plans.']),
       benchmarkSources[source].caveat,
+      ...(hedgeError ? [secondaryNotice(hedgeError, benchmarkSources[source].name)] : []),
       ...(o.mode === 'value' ? [`Value lists the price/score frontier: each row ${plan.perModelLimit ? 'uses more of the allowance' : 'costs more'} and scores higher than the previous one; every omitted model is beaten on both. Alternatives score within ${o.margin} of a frontier model${hedge ? ` (or within ${hedge.margin} on ${benchmarkSources[hedge.source].name})` : ''} in the same price tier.`] : []),
     ],
     total: front.length, catalogSize: snapshot.models.length, models, skipped,
     hedge: hedge ? { source: hedge.source, name: benchmarkSources[hedge.source].name, margin: hedge.margin } : null,
+    hedgeError,
     dominated: o.mode === 'value' ? rows.length - front.length - models.filter(m => m.alternativeTo).length : 0,
   };
 }
 
+const secondaryNotice = (e, primary) => `Second source ${e.name} unavailable (${e.error}); alternatives use ${primary} only.`;
 const tasks = m => m.unlimited ? 'unlimited' : Math.floor(m.tasksPerMonth).toLocaleString('en-US');
 // The one plan-specific number per row: Copilot bills dollars from one pool; Go limits each model's share.
 const billingColumns = (result, verbose) => result.plan.id === 'github-copilot'
@@ -316,6 +320,7 @@ export function format(result, { verbose = false, style = (_, text) => text } = 
   const lines = [`${style('bold', o.mode === 'value' ? 'Best value' : 'Best models')} ${style('dim', `· ${plan.label} · ${scope} · ${result.source.name}`)}`];
   if (o.mode === 'value') lines.push(style('dim', `Each numbered row scores higher and ${go ? 'gets fewer tasks per month' : 'costs more'} than the one above. Indented: alternatives within ${o.margin} points${result.hedge ? ` (or ${result.hedge.margin} on ${result.hedge.name})` : ''} in the same price tier.`));
   if (result.stale || result.eligibility?.stale) lines.push(style('yellow', `STALE cached data; run model-value ${plan.id} refresh`));
+  if (result.hedgeError) lines.push(style('yellow', secondaryNotice(result.hedgeError, result.source.name)));
   const [[label, cell]] = billingColumns(result, false);
   const rows = [['#', 'MODEL', 'SCORE', label, ''], ...numbered(result.models).map(([n, m]) => [n, m.alternativeTo ? `  ${m.id}` : m.id, m.score.toFixed(result.source.id === 'aa' ? 1 : 0), cell(m), result.hedge ? m.closeOn?.join('+') ?? '' : ''])];
   const widths = rows[0].map((_, col) => Math.max(...rows.map(row => row[col].length)));

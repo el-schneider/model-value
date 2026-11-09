@@ -7,6 +7,7 @@ import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { rank, format, loadSnapshot, options, sources, ttl } from '../src/index.js';
+import { query } from '../src/query.js';
 import extension from '../extensions/model-value.js';
 
 delete process.env.ARTIFICIAL_ANALYSIS_API_KEY;
@@ -218,6 +219,27 @@ test('aa refresh sends the key and scores by intelligence index', async t => {
   assert.equal(result.source.id, 'aa');
   assert.equal(result.models[0].score, 55);
   assert(!(await readFile(cache, 'utf8')).includes('secret-key'));
+});
+
+test('a failing second source leaves the ranking intact and names the failure; a failing primary still throws', async t => {
+  const dir = await temp(t), cache = join(dir, 'cache.json');
+  const xdg = process.env.XDG_CACHE_HOME;
+  // Earlier tests leave arena scores in model-frontier's cache; start without them so arena must fetch.
+  process.env.XDG_CACHE_HOME = dir;
+  process.env.ARTIFICIAL_ANALYSIS_API_KEY = 'secret-key';
+  t.after(() => { delete process.env.ARTIFICIAL_ANALYSIS_API_KEY; process.env.XDG_CACHE_HOME = xdg; });
+  await writeFile(cache, JSON.stringify(fixture('aa')));
+  t.mock.method(globalThis, 'fetch', async url => url === sources.pricing
+    ? new Response(JSON.stringify({ 'github-copilot': { models: Object.fromEntries(fixture().models.map(m => [m.id, m])) } }))
+    : new Response('Bad Gateway', { status: 502 }));
+  const result = await query({ source: 'aa' }, { all: true, cache });
+  assert.deepEqual(result.models.map(m => m.id), ['beta', 'alpha']);
+  assert.equal(result.hedge, null);
+  assert.equal(result.hedgeError.source, 'arena');
+  assert.match(result.hedgeError.error, /HTTP 502/);
+  assert.match(format(result), /Second source LMArena WebDev Elo unavailable \(.*HTTP 502.*\); alternatives use Artificial Analysis Intelligence Index only\./);
+  assert.equal((await query({ source: 'aa', margin: 0 }, { all: true, cache })).hedgeError, null);
+  await assert.rejects(query({ source: 'aa' }, { all: true, cache: join(dir, 'empty.json') }), /HTTP 502/);
 });
 
 test('CLI pretty, JSON, failure and empty-result exits work as subprocesses', async t => {

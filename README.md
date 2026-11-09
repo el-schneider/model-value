@@ -73,7 +73,7 @@ model-value opencode-go --json       # for scripts and agents
 
 Works without any key: scores come from the public [LMArena WebDev](https://lmarena.ai/leaderboard/webdev) leaderboard (human-preference Elo on coding tasks, [CC BY 4.0](https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset)).
 
-Set `ARTIFICIAL_ANALYSIS_API_KEY` ([free](https://artificialanalysis.ai/data-api)) to use the [Artificial Analysis](https://artificialanalysis.ai) Intelligence Index instead. Arena then acts as a second opinion: a model it rates close to the frontier also shows up as an alternative, tagged `arena`. `--source aa|arena` picks the ranking source explicitly. Copilot prices come from https://models.dev. Everything is cached for 6 hours; `model-value <plan> refresh` forces a fetch.
+Set `ARTIFICIAL_ANALYSIS_API_KEY` ([free](https://artificialanalysis.ai/data-api)) to use the [Artificial Analysis](https://artificialanalysis.ai) Intelligence Index instead. Arena then acts as a second opinion: a model it rates close to the frontier also shows up as an alternative, tagged `arena`. If the second source cannot be fetched, the ranking still runs on the first and says so (`hedgeError` in `--json`). `--source aa|arena` picks the ranking source explicitly. Copilot prices come from https://models.dev. Everything is cached for 6 hours; `model-value <plan> refresh` forces a fetch.
 
 ## Agents
 

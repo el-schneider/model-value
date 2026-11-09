@@ -21,10 +21,17 @@ export async function query(raw = {}, { plan = 'github-copilot', all = false, mo
   const snapshot = await loadSnapshot({ ...sourceOptions, plan: p.id, cache, source: rankingOptions.source });
   // Arena needs no key, so it can always second-guess AA; AA can back up Arena only when a key is set.
   const other = rankingOptions.source === 'aa' ? 'arena' : process.env.ARTIFICIAL_ANALYSIS_API_KEY ? 'aa' : null;
-  const secondary = rankingOptions.mode === 'value' && rankingOptions.margin && other
-    ? await loadSnapshot({ ...sourceOptions, plan: p.id, source: other, cache: sourceOptions.cache ? `${cache}.${other}.json` : defaultCache(p.id, other), optional: true })
-    : undefined;
-  const result = rank(snapshot, rankingOptions, { modelIds: allowed, mappings, secondary });
+  let secondary, secondaryError;
+  if (rankingOptions.mode === 'value' && rankingOptions.margin && other) {
+    try {
+      secondary = await loadSnapshot({ ...sourceOptions, plan: p.id, source: other, cache: sourceOptions.cache ? `${cache}.${other}.json` : defaultCache(p.id, other), optional: true });
+    } catch (error) {
+      // The second source only adds alternatives, so the ranking stays valid without it; the result names the failure.
+      if (sourceOptions.signal?.aborted) throw error;
+      secondaryError = { source: other, error: error.message };
+    }
+  }
+  const result = rank(snapshot, rankingOptions, { modelIds: allowed, mappings, secondary, secondaryError });
   if (eligible) {
     result.scope = 'copilot-subscription';
     result.eligibility = { fetchedAt: eligible.fetchedAt, stale: eligible.stale, source: `${eligible.endpoint}/models`, selection: eligible.selection, enabledCount: eligible.modelIds.length, tokenSource: eligible.tokenSource, skippedTokens: eligible.skippedTokens };
